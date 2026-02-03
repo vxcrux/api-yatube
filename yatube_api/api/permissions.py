@@ -7,9 +7,13 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
     Запросы GET, HEAD и OPTIONS разрешены всем.
     """
 
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
-            return True
-        if hasattr(obj, 'author'):
-            return obj.author == request.user
-        return False
+            return request.user.is_authenticated
+
+        if request.method == 'POST':
+            return request.user.is_authenticated
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        return obj.author == request.user
